@@ -1,3 +1,15 @@
 <resources>
   <string name="app_name">Assignment5</string>
+  <string name="username">Username</string>
+  <string name="password">Password</string>
+  <string name="login">Login</string>
+  <string name="product_image">Product Image</string>
+  <string name="textview">TextView</string>
+  <string name="text">TextView</string>
+  <string name="fe">TextView</string>
+  <string name="product_price_format">$ %.2f</string>
+  <string name="No_Product_Available">No_Product_Available</string>
+  <string name="api_error">Api Error</string>
+  <string name="no_product_available">No Product Available</string>
+  <!-- TODO: Remove or change this placeholder text -->
 </resources>
