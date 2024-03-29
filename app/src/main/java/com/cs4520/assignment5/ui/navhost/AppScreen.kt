@@ -1,6 +1,5 @@
 package com.cs4520.assignment5.ui.navhost
 
-import com.cs4520.assignment5.ui.productlist.ProductListScreen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -9,14 +8,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.cs4520.assignment5.core.background.WorkerScheduler
 import com.cs4520.assignment5.features.login.LoginViewModel
 import com.cs4520.assignment5.ui.common.ProductListScreens
 import com.cs4520.assignment5.ui.login.LoginScreen
+import com.cs4520.assignment5.ui.productlist.ProductListScreen
 
 @Composable
 fun AmazingProductListApp(
     viewModel: LoginViewModel = viewModel(),
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    workerScheduler: WorkerScheduler
 ) {
     NavHost(
         navController = navController,
@@ -35,7 +37,7 @@ fun AmazingProductListApp(
             )
         }
         composable(route = ProductListScreens.ProductList.name) {
-            ProductListScreen()
+            ProductListScreen(workerScheduler = workerScheduler)
         }
     }
 }

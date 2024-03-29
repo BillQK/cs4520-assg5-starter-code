@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,13 +26,16 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs4520.assignment5.R
-import com.cs4520.assignment5.common.Result
+import com.cs4520.assignment5.common.ApiResult
+import com.cs4520.assignment5.core.background.WorkerScheduler
 import com.cs4520.assignment5.core.database.AppDatabase
 import com.cs4520.assignment5.core.model.Product
 import com.cs4520.assignment5.features.productlist.ProductListRepo
@@ -41,6 +45,7 @@ import com.cs4520.assignment5.features.productlist.ProductListViewModelFactory
 @Composable
 @Preview
 fun ProductListScreen(
+    workerScheduler: WorkerScheduler,
     viewModel: ProductListViewModel = viewModel(
         factory = ProductListViewModelFactory(
             ProductListRepo(
@@ -53,17 +58,18 @@ fun ProductListScreen(
     val productList by viewModel.productList.observeAsState(initial = null)
     LaunchedEffect(Unit) {
         viewModel.loadData()
+        workerScheduler.scheduleProductRefreshWorker(1)
     }
     when (val result = productList) {
-        is Result.Success -> {
+        is ApiResult.Success -> {
             ProductList(products = result.data)
         }
 
-        is Result.Error -> {
+        is ApiResult.Error -> {
             ErrorView(exception = result.exception)
         }
 
-        is Result.Empty -> {
+        is ApiResult.Empty -> {
             EmptyView()
         }
 
@@ -85,11 +91,11 @@ fun ProductItem(product: Product) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .height(80.dp),
+        shape = RectangleShape
     ) {
         Row(
             modifier = Modifier
-                .padding(8.dp)
                 .background(
                     color = when (product.type) {
                         "Food" -> Color(0xFFFFD965)
@@ -107,7 +113,9 @@ fun ProductItem(product: Product) {
             Image(
                 painter = imagePainter,
                 contentDescription = "Product Type",
-                modifier = Modifier.width(50.dp).height(50.dp)
+                modifier = Modifier.size(75.dp).padding(10.dp),
+                contentScale = ContentScale.Crop,
+
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column {
@@ -170,4 +178,15 @@ fun EmptyView() {
     }
 }
 
-
+@Preview
+@Composable
+fun PreviewProductItem() {
+    ProductItem(
+        Product(
+            name = "Sample Product",
+            price = 10.99,
+            type = "Food",
+            expiryDate = "2024-12-31" // Optional expiry date
+        )
+    )
+}

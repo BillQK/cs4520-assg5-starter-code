@@ -9,14 +9,14 @@ import com.cs4520.assignment5.core.network.NetworkStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Response
-import com.cs4520.assignment5.common.Result
+import com.cs4520.assignment5.common.ApiResult
 
 class ProductListRepo(
     private val productDAO: ProductDao,
     context: Context
 ) {
     private val networkStatus = NetworkStatus(context)
-    suspend fun getProducts(page: Int? = null): Result<List<Product>> =
+    suspend fun getProducts(page: Int? = null): ApiResult<List<Product>> =
         withContext(Dispatchers.IO) {
             if (networkStatus.isNetworkAvailable()) {
                 fetchProductsFromApi(page)
@@ -24,35 +24,50 @@ class ProductListRepo(
                 fetchProductsFromDatabase()
             }
         }
+    suspend fun getNewProducts() : ApiResult<List<Product>>  =
+        withContext(Dispatchers.IO) {
+            if (networkStatus.isNetworkAvailable()) {
+                fetchNewProductsFromApi()
+            } else {
+                ApiResult.Error(Exception("No network available"))
+            }
+        }
 
-    private suspend fun fetchProductsFromApi(page: Int?): Result<List<Product>> = try {
+    private suspend fun fetchProductsFromApi(page: Int?): ApiResult<List<Product>> = try {
         val response = Retrofit.api.getProducts(page)
         processApiResponse(response)
     } catch (e: Exception) {
-        Result.Error(e)
+        ApiResult.Error(e)
     }
 
-    private suspend fun processApiResponse(response: Response<List<Product>>): Result<List<Product>> {
+    private suspend fun fetchNewProductsFromApi(): ApiResult<List<Product>> = try {
+        val response = Retrofit.api.getNewProducts()
+        processApiResponse(response)
+    } catch (e: Exception) {
+        ApiResult.Error(e)
+    }
+
+    private suspend fun processApiResponse(response: Response<List<Product>>): ApiResult<List<Product>> {
         if (!response.isSuccessful) {
-            return Result.Error(Exception("API Error: ${response.message()}"))
+            return ApiResult.Error(Exception("API Error: ${response.message()}"))
         }
-        val body = response.body() ?: return Result.Empty(Exception("No data"))
+        val body = response.body() ?: return ApiResult.Empty(Exception("No data"))
         return if (body.isEmpty()) {
-            Result.Empty(Exception("No data"))
+            ApiResult.Empty(Exception("No data"))
         } else {
             saveProductsToDatabase(body)
-            Result.Success(body)
+            ApiResult.Success(body)
         }
     }
 
     private suspend fun saveProductsToDatabase(products: List<Product>) =
         productDAO.insertAllProducts(products.mapToEntities())
 
-    private suspend fun fetchProductsFromDatabase(): Result<List<Product>> =
+    private suspend fun fetchProductsFromDatabase(): ApiResult<List<Product>> =
         withContext(Dispatchers.IO) {
             val products = productDAO.getAllProducts().mapToDomain()
-            if (products.isNotEmpty()) Result.Success(products)
-            else Result.Empty(Exception("No data in database"))
+            if (products.isNotEmpty()) ApiResult.Success(products)
+            else ApiResult.Empty(Exception("No data in database"))
         }
 
     private fun List<Product>.mapToEntities(): List<ProductEntity> = map { product ->
@@ -72,5 +87,7 @@ class ProductListRepo(
             type = entity.type
         )
     }
+
+
 }
 

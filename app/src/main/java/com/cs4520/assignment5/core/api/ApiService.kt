@@ -8,4 +8,7 @@ import retrofit2.http.Query
 interface ApiService {
     @GET(Api.ENDPOINT)
     suspend fun getProducts(@Query("page") pageNumber: Int?) : Response<List<Product>>
+
+    @GET(Api.SCHEDULED_ENDPOINT)
+    suspend fun getNewProducts() : Response<List<Product>>
 }
