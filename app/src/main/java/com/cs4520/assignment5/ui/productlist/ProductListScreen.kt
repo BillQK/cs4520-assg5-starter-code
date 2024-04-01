@@ -1,5 +1,6 @@
 package com.cs4520.assignment5.ui.productlist
 
+import android.app.Application
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -35,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs4520.assignment5.R
 import com.cs4520.assignment5.common.ApiResult
-import com.cs4520.assignment5.core.background.WorkerScheduler
 import com.cs4520.assignment5.core.database.AppDatabase
 import com.cs4520.assignment5.core.model.Product
 import com.cs4520.assignment5.features.productlist.ProductListRepo
@@ -43,14 +43,13 @@ import com.cs4520.assignment5.features.productlist.ProductListViewModel
 import com.cs4520.assignment5.features.productlist.ProductListViewModelFactory
 
 @Composable
-@Preview
 fun ProductListScreen(
-    workerScheduler: WorkerScheduler,
     viewModel: ProductListViewModel = viewModel(
         factory = ProductListViewModelFactory(
+            LocalContext.current.applicationContext as Application,
             ProductListRepo(
                 AppDatabase.getDatabase(LocalContext.current).productDao(),
-                LocalContext.current
+                LocalContext.current,
             )
         )
     )
@@ -58,7 +57,7 @@ fun ProductListScreen(
     val productList by viewModel.productList.observeAsState(initial = null)
     LaunchedEffect(Unit) {
         viewModel.loadData()
-        workerScheduler.scheduleProductRefreshWorker(1)
+        viewModel.scheduleProductRefreshWorker(1)
     }
     when (val result = productList) {
         is ApiResult.Success -> {

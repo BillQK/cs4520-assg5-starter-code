@@ -7,10 +7,11 @@ import androidx.work.WorkerParameters
 import com.cs4520.assignment5.common.ApiResult
 import com.cs4520.assignment5.core.database.AppDatabase
 import com.cs4520.assignment5.features.productlist.ProductListRepo
+import com.cs4520.assignment5.features.productlist.ProductListViewModel
 
 class ProductRefreshWorker(
     context: Context,
-    workerParams: WorkerParameters
+    workerParams: WorkerParameters,
 ) : CoroutineWorker(context, workerParams) {
     override suspend fun doWork(): Result {
         val repo = ProductListRepo(
@@ -18,7 +19,6 @@ class ProductRefreshWorker(
             applicationContext
         )
         val products = repo.getNewProducts()
-        Log.d("Worker", "Hello WORLD from my slave")
         return when (products) {
             is ApiResult.Empty -> {
                 Result.failure()

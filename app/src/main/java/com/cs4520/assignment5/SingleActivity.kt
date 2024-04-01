@@ -3,7 +3,6 @@ package com.cs4520.assignment5
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.cs4520.assignment5.core.background.WorkerScheduler
 import com.cs4520.assignment5.ui.navhost.AmazingProductListApp
 
 
@@ -14,10 +13,9 @@ class SingleActivity : ComponentActivity() {
     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val workerScheduler = WorkerScheduler(applicationContext)
 
         setContent{
-            AmazingProductListApp(workerScheduler = workerScheduler)
+            AmazingProductListApp()
         }
     }
 }
