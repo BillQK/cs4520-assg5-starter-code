@@ -54,7 +54,7 @@ class ProductListViewModel(
 
         val periodicWorkRequest = PeriodicWorkRequestBuilder<ProductRefreshWorker>(
             repeatInterval = repeatedInterval,
-            repeatIntervalTimeUnit = TimeUnit.SECONDS,
+            repeatIntervalTimeUnit = TimeUnit.HOURS
         ).setConstraints(constraints).build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
